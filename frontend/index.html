@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LogSentinel Dashboard Preview</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%230f1c32'/%3E%3Cpath fill='%236bdcff' d='M28 12h12l-8 15h10L26 52l4-17H20z'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Chivo:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Fallback to show a message if the main bundle fails to render.
+      window.__lsMounted = false;
+      window.__lsShowFatal = (msg) => {
+        const root = document.getElementById("root");
+        if (root) {
+          root.innerHTML = `
+            <div style="max-width:960px;margin:32px auto;padding:16px 18px;border:1px solid rgba(255,255,255,0.12);border-radius:12px;background:rgba(255,255,255,0.04);color:#e9f1fb;font-family:Space Grotesk,Segoe UI,sans-serif">
+              <div style="font-weight:600;margin-bottom:6px;">Dashboard failed to load</div>
+              <div style="color:#9fb3c8;font-size:13px;">${msg}</div>
+            </div>`;
+        }
+      };
+      setTimeout(() => {
+        if (!window.__lsMounted) {
+          window.__lsShowFatal("Scripts did not initialize. If you are offline or behind a firewall, the CDN libraries may be blocked. All libraries are also mirrored locally under frontend/vendor.");
+        }
+      }, 2500);
+    </script>
+    <script src="./vendor/react.production.min.js"></script>
+    <script src="./vendor/react-dom.production.min.js"></script>
+    <script src="./vendor/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #070f1d;
+        --panel: #0f1c32;
+        --panel-strong: #132544;
+        --muted: #9fb3c8;
+        --text: #e9f1fb;
+        --accent: #6bdcff;
+        --accent-2: #ffb347;
+        --danger: #ff6b6b;
+        --success: #8de17a;
+        --border: rgba(255, 255, 255, 0.06);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Chivo", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 18% 20%, #1b335d, #070f1d 38%),
+          radial-gradient(circle at 82% 10%, #0f2d44, #070f1d 35%),
+          linear-gradient(135deg, #060d19, #0a1322 60%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+      .shell {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 36px 20px 80px;
+      }
+      header {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 22px;
+      }
+      .title {
+        font-size: 30px;
+        letter-spacing: -0.6px;
+        margin: 0 0 8px;
+      }
+      .subtitle {
+        margin: 0;
+        color: var(--muted);
+        max-width: 640px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--accent);
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+      .pill-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 6px rgba(107, 220, 255, 0.15);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      .grid-wide {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+      }
+      .panel {
+        background: linear-gradient(145deg, var(--panel), var(--panel-strong));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35);
+      }
+      .panel h3 {
+        margin: 0 0 8px;
+        font-size: 15px;
+        letter-spacing: 0.2px;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+      .stat-value {
+        font-size: 28px;
+        margin: 8px 0 4px;
+        font-weight: 600;
+      }
+      .stat-label {
+        color: var(--muted);
+        margin: 0;
+        font-size: 13px;
+        letter-spacing: 0.3px;
+      }
+      .stat-trend {
+        color: var(--accent-2);
+        font-weight: 600;
+        font-size: 12px;
+        letter-spacing: 0.3px;
+      }
+      .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 26px 0 12px;
+      }
+      .section-heading h2 {
+        margin: 0;
+        font-size: 18px;
+        letter-spacing: 0.2px;
+      }
+      .section-heading .note {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .bars {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .bar-row {
+        display: grid;
+        grid-template-columns: 1fr 70px;
+        gap: 10px;
+        align-items: center;
+      }
+      .bar {
+        width: 100%;
+        height: 12px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+      }
+      .bar-fill {
+        position: absolute;
+        inset: 0;
+        border-radius: 10px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        transform-origin: left;
+      }
+      .bar-label {
+        font-weight: 600;
+        letter-spacing: 0.4px;
+      }
+      .chip {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 12px;
+        letter-spacing: 0.3px;
+      }
+      .chip-high {
+        background: rgba(255, 107, 107, 0.15);
+        color: var(--danger);
+      }
+      .chip-medium {
+        background: rgba(255, 179, 71, 0.15);
+        color: var(--accent-2);
+      }
+      .chip-low {
+        background: rgba(141, 225, 122, 0.15);
+        color: var(--success);
+      }
+      .list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .list-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 10px 12px;
+        border-radius: 10px;
+      }
+      .list-row strong {
+        font-weight: 600;
+      }
+      .footer {
+        margin-top: 28px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      a {
+        color: var(--accent);
+      }
+      .chart-card {
+        min-height: 320px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .chart-container {
+        flex: 1;
+        position: relative;
+      }
+      .legend-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .legend-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--text);
+      }
+      .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+      }
+      .alert-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .alert-card {
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .alert-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .alert-meta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        font-size: 12px;
+        gap: 6px;
+      }
+      .tag-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script>
+      if (!window.React || !window.ReactDOM || !window.Chart) {
+        window.__lsShowFatal(
+          "Required libraries failed to load. If you're offline or behind a restricted network, the CDN fetch may be blocked. The app ships local copies under frontend/vendor — ensure you're serving from the logsentinel directory."
+        );
+        throw new Error("Missing React/ReactDOM/Chart globals");
+      }
+      const { useEffect, useMemo, useRef, useState } = React;
+      const { createRoot } = ReactDOM;
+      const ChartJS = window.Chart;
+      const {
+        ArcElement,
+        Tooltip,
+        Legend,
+        CategoryScale,
+        LinearScale,
+        PointElement,
+        LineElement,
+        Filler,
+      } = ChartJS;
+      ChartJS.register(
+        ArcElement,
+        Tooltip,
+        Legend,
+        CategoryScale,
+        LinearScale,
+        PointElement,
+        LineElement,
+        Filler
+      );
+      const Chart = ChartJS;
+
+      const StatCard = ({ label, value, hint, trend }) =>
+        React.createElement(
+          "div",
+          { className: "panel" },
+          React.createElement("h3", null, label),
+          React.createElement("div", { className: "stat-value" }, value),
+          hint
+            ? React.createElement(
+                "div",
+                { className: "stat-label" },
+                hint
+              )
+            : null,
+          trend
+            ? React.createElement(
+                "div",
+                { className: "stat-trend" },
+                trend
+              )
+            : null
+        );
+
+      const DonutChart = ({ title, data }) => {
+        const canvasRef = useRef(null);
+
+        useEffect(() => {
+          if (!canvasRef.current || !data.labels.length) return;
+          const ctx = canvasRef.current.getContext("2d");
+          const chart = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+              labels: data.labels,
+              datasets: [
+                {
+                  data: data.values,
+                  backgroundColor: data.colors,
+                  borderWidth: 0,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: (item) =>
+                      `${item.label}: ${item.raw} ${
+                        item.raw === 1 ? "event" : "events"
+                      }`,
+                  },
+                },
+              },
+              cutout: "62%",
+            },
+          });
+          return () => chart.destroy();
+        }, [data]);
+
+        return React.createElement(
+          "div",
+          { className: "panel chart-card" },
+          React.createElement("h3", null, title),
+          React.createElement(
+            "div",
+            { className: "chart-container" },
+            React.createElement("canvas", { ref: canvasRef })
+          ),
+          data.labels.length
+            ? React.createElement(
+                "div",
+                { className: "legend-row" },
+                data.labels.map((label, idx) =>
+                  React.createElement(
+                    "span",
+                    { className: "legend-chip", key: label },
+                    React.createElement("span", {
+                      className: "legend-dot",
+                      style: { background: data.colors[idx] },
+                    }),
+                    `${label}: ${data.values[idx]}`
+                  )
+                )
+              )
+            : React.createElement(
+                "p",
+                { className: "stat-label" },
+                "No data"
+              )
+        );
+      };
+
+      const LineChart = ({ title, data }) => {
+        const canvasRef = useRef(null);
+        useEffect(() => {
+          if (!canvasRef.current || !data.labels.length) return;
+          const ctx = canvasRef.current.getContext("2d");
+          const chart = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: data.labels,
+              datasets: [
+                {
+                  label: "Failed logins",
+                  data: data.values,
+                  tension: 0.3,
+                  borderColor: "rgba(107, 220, 255, 0.9)",
+                  backgroundColor: "rgba(107, 220, 255, 0.18)",
+                  fill: true,
+                  pointRadius: 4,
+                  pointHoverRadius: 5,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: {
+                  ticks: { color: "#9fb3c8" },
+                  grid: { color: "rgba(255,255,255,0.04)" },
+                },
+                y: {
+                  ticks: { color: "#9fb3c8" },
+                  grid: { color: "rgba(255,255,255,0.04)" },
+                  beginAtZero: true,
+                  suggestedMax: Math.max(...data.values, 3),
+                },
+              },
+            },
+          });
+          return () => chart.destroy();
+        }, [data]);
+
+        return React.createElement(
+          "div",
+          { className: "panel chart-card" },
+          React.createElement("h3", null, title),
+          React.createElement(
+            "div",
+            { className: "chart-container" },
+            React.createElement("canvas", { ref: canvasRef })
+          )
+        );
+      };
+
+      const SeverityBars = ({ items }) => {
+        if (!items.length) {
+          return React.createElement("p", { className: "stat-label" }, "No alerts");
+        }
+        const maxValue = Math.max(...items.map((i) => i.count), 1);
+        const chipClass = (level) => {
+          if (level.toLowerCase() === "high") return "chip chip-high";
+          if (level.toLowerCase() === "medium") return "chip chip-medium";
+          return "chip chip-low";
+        };
+        return React.createElement(
+          "div",
+          { className: "bars" },
+          items.map((item) =>
+            React.createElement(
+              "div",
+              { className: "bar-row", key: item.level },
+              React.createElement(
+                "div",
+                null,
+                React.createElement(
+                  "div",
+                  { className: "bar-label" },
+                  item.level.toUpperCase()
+                ),
+                React.createElement(
+                  "div",
+                  { className: "bar" },
+                  React.createElement("div", {
+                    className: "bar-fill",
+                    style: { transform: `scaleX(${item.count / maxValue})` },
+                  })
+                )
+              ),
+              React.createElement(
+                "div",
+                { style: { textAlign: "right" } },
+                React.createElement(
+                  "span",
+                  { className: chipClass(item.level) },
+                  item.count,
+                  " alert",
+                  item.count === 1 ? "" : "s"
+                )
+              )
+            )
+          )
+        );
+      };
+
+      const RankedList = ({ title, items, labelKey, valueKey }) => {
+        if (!items.length) {
+          return React.createElement("p", { className: "stat-label" }, "No data");
+        }
+        return React.createElement(
+          "div",
+          { className: "panel" },
+          React.createElement(
+            "div",
+            { className: "section-heading" },
+            React.createElement("h2", null, title)
+          ),
+          React.createElement(
+            "div",
+            { className: "list" },
+            items.map((item, idx) =>
+              React.createElement(
+                "div",
+                { className: "list-row", key: idx },
+                React.createElement("strong", null, item[labelKey]),
+                React.createElement(
+                  "span",
+                  { className: "stat-label" },
+                  item[valueKey],
+                  " events"
+                )
+              )
+            )
+          )
+        );
+      };
+
+      const AlertList = ({ alerts }) => {
+        if (!alerts.length) {
+          return React.createElement("p", { className: "stat-label" }, "No alerts recorded");
+        }
+        const formatTime = (ts) => {
+          if (!ts) return "n/a";
+          return new Date(ts).toLocaleString();
+        };
+        const severityColor = (sev) => {
+          const s = (sev || "").toLowerCase();
+          if (s === "high") return "#ff6b6b";
+          if (s === "medium") return "#ffb347";
+          return "#8de17a";
+        };
+        const typeColor = (type) => {
+          const t = (type || "").toLowerCase();
+          if (t.includes("brute")) return "#6bdcff";
+          if (t.includes("suspicious")) return "#d4b3ff";
+          if (t.includes("rate")) return "#ffb347";
+          return "#9fb3c8";
+        };
+        const duration = (start, end) => {
+          if (!start || !end) return "n/a";
+          const ms = new Date(end) - new Date(start);
+          if (Number.isNaN(ms) || ms < 0) return "n/a";
+          const mins = ms / 60000;
+          if (mins < 1) return `${(ms / 1000).toFixed(0)}s`;
+          if (mins < 60) return `${mins.toFixed(1)} min`;
+          return `${(mins / 60).toFixed(1)} hr`;
+        };
+        return React.createElement(
+          "div",
+          { className: "alert-list" },
+          alerts.slice(0, 8).map((alert, idx) =>
+            React.createElement(
+              "div",
+              { className: "alert-card", key: idx },
+              React.createElement(
+                "div",
+                { className: "alert-head" },
+                React.createElement(
+                  "div",
+                  { style: { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" } },
+                  React.createElement(
+                    "span",
+                    { className: "tag" },
+                    React.createElement("span", {
+                      className: "tag-dot",
+                      style: { background: severityColor(alert.severity) },
+                    }),
+                    (alert.severity || "n/a").toUpperCase()
+                  ),
+                  React.createElement(
+                    "span",
+                    { className: "tag" },
+                    React.createElement("span", {
+                      className: "tag-dot",
+                      style: { background: typeColor(alert.type) },
+                    }),
+                    alert.type || "ALERT"
+                  )
+                ),
+                React.createElement(
+                  "span",
+                  { className: "stat-label" },
+                  `Window: ${formatTime(alert.time_start)} → ${formatTime(alert.time_end)}`
+                )
+              ),
+              React.createElement(
+                "div",
+                { className: "alert-meta" },
+                React.createElement("span", null, `Source IP: ${alert.source_ip || "?"}`),
+                React.createElement("span", null, `Occurrences: ${alert.count ?? "-"}`),
+                React.createElement("span", null, `Duration: ${duration(alert.time_start, alert.time_end)}`),
+                alert.username ? React.createElement("span", null, `User: ${alert.username}`) : null
+              ),
+              alert.details
+                ? React.createElement(
+                    "div",
+                    { className: "stat-label", style: { marginTop: "6px" } },
+                    alert.details
+                  )
+                : null,
+              alert.raw_line
+                ? React.createElement(
+                    "div",
+                    { className: "stat-label", style: { marginTop: "6px", fontSize: "12px" } },
+                    `Raw: ${alert.raw_line}`
+                  )
+                : null
+            )
+          )
+        );
+      };
+
+      const App = () => {
+        const [data, setData] = useState(null);
+        const [alerts, setAlerts] = useState([]);
+        const [error, setError] = useState(null);
+        const [loading, setLoading] = useState(true);
+
+        useEffect(() => {
+          window.__lsMounted = true;
+        }, []);
+
+        useEffect(() => {
+          const load = async () => {
+            try {
+              const [dashRes, alertRes] = await Promise.all([
+                fetch("../data/dashboard_data.json"),
+                fetch("../data/alerts.json"),
+              ]);
+              if (!dashRes.ok) {
+                throw new Error("Unable to load dashboard_data.json");
+              }
+              const dashJson = await dashRes.json();
+              const alertJson = alertRes.ok ? await alertRes.json() : [];
+              setData(dashJson);
+              setAlerts(Array.isArray(alertJson) ? alertJson : []);
+            } catch (err) {
+              setError(err.message);
+            } finally {
+              setLoading(false);
+            }
+          };
+          load();
+        }, []);
+
+        const severityItems = useMemo(() => {
+          if (!data) return [];
+          return Object.entries(data.alerts_by_severity || {}).map(
+            ([level, count]) => ({ level, count: Number(count) })
+          );
+        }, [data]);
+
+        const alertTypeDonut = useMemo(() => {
+          if (!data) return { labels: [], values: [], colors: [] };
+          const entries = Object.entries(data.alerts_by_type || {});
+          const palette = ["#6bdcff", "#ffb347", "#8de17a", "#d4b3ff", "#ff6b6b"];
+          return {
+            labels: entries.map(([key]) => key),
+            values: entries.map(([, v]) => Number(v)),
+            colors: entries.map((_, idx) => palette[idx % palette.length]),
+          };
+        }, [data]);
+
+        const severityDonut = useMemo(() => {
+          const palette = {
+            high: "#ff6b6b",
+            medium: "#ffb347",
+            low: "#8de17a",
+            unknown: "#6bdcff",
+          };
+          return {
+            labels: severityItems.map((i) => i.level),
+            values: severityItems.map((i) => i.count),
+            colors: severityItems.map((i) => palette[i.level.toLowerCase()] || palette.unknown),
+          };
+        }, [severityItems]);
+
+        const timeline = useMemo(() => {
+          const formatter = new Intl.DateTimeFormat(undefined, {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          const items = (data?.attack_patterns?.failed_logins_by_hour || []).slice();
+          items.sort(
+            (a, b) => new Date(a.hour).getTime() - new Date(b.hour).getTime()
+          );
+          return {
+            labels: items.map((i) => formatter.format(new Date(i.hour))),
+            values: items.map((i) => Number(i.count)),
+          };
+        }, [data]);
+
+        const topIps = useMemo(
+          () => data?.attack_patterns?.top_source_ips || [],
+          [data]
+        );
+        const topUsers = useMemo(
+          () => data?.attack_patterns?.top_usernames || [],
+          [data]
+        );
+
+        const totalAlerts =
+          alerts.length ||
+          severityItems.reduce((sum, item) => sum + item.count, 0);
+        const successRate =
+          data && data.total_events
+            ? Math.max(
+                0,
+                Math.min(
+                  100,
+                  ((data.total_events - (data.failed_logins || 0)) /
+                    data.total_events) *
+                    100
+                )
+              )
+            : 0;
+
+        if (loading) {
+          return React.createElement(
+            "div",
+            { className: "shell" },
+            React.createElement(
+              "div",
+              { className: "panel" },
+              "Loading dashboard data..."
+            )
+          );
+        }
+
+        if (error) {
+          return React.createElement(
+            "div",
+            { className: "shell" },
+            React.createElement(
+              "div",
+              { className: "panel", style: { borderColor: "rgba(255,107,107,0.4)" } },
+              error
+            )
+          );
+        }
+
+        return React.createElement(
+          "div",
+          { className: "shell" },
+          React.createElement(
+            "header",
+            null,
+            React.createElement(
+              "div",
+              null,
+              React.createElement(
+                "p",
+                { className: "pill" },
+                React.createElement("span", { className: "pill-dot" }),
+                "Live preview"
+              ),
+              React.createElement(
+                "h1",
+                { className: "title" },
+                "LogSentinel dashboard-ready data"
+              ),
+              React.createElement(
+                "p",
+                { className: "subtitle" },
+                "React preview over dashboard_data.json and alerts.json to validate the feed powering charts, lists, and severity indicators."
+              )
+            )
+          ),
+
+          React.createElement(
+            "div",
+            { className: "grid" },
+            React.createElement(StatCard, {
+              label: "Total events",
+              value: data.total_events ?? 0,
+              hint: "Raw log lines parsed",
+            }),
+            React.createElement(StatCard, {
+              label: "Failed logins",
+              value: data.failed_logins ?? 0,
+              hint: "Feeds brute-force and rate-limit detectors",
+            }),
+            React.createElement(StatCard, {
+              label: "Unique attackers",
+              value: data.unique_attackers ?? 0,
+              hint: "Distinct source IPs seen failing",
+            }),
+            React.createElement(StatCard, {
+              label: "Alerts generated",
+              value: totalAlerts,
+              hint: "From current detector set",
+              trend: `Success rate ${(successRate || 0).toFixed(1)}%`,
+            })
+          ),
+
+          React.createElement(
+            "div",
+            { className: "grid-wide", style: { marginTop: "18px" } },
+            React.createElement(DonutChart, {
+              title: "Alerts by type",
+              data: alertTypeDonut,
+            }),
+            React.createElement(DonutChart, {
+              title: "Alerts by severity",
+              data: severityDonut,
+            }),
+            React.createElement(LineChart, {
+              title: "Failed logins over time",
+              data: timeline,
+            })
+          ),
+
+          React.createElement(
+            "div",
+            { className: "section-heading" },
+            React.createElement("h2", null, "Severity distribution"),
+            React.createElement(
+              "span",
+              { className: "note" },
+              "Stacked bars to eyeball volume by impact"
+            )
+          ),
+          React.createElement("div", { className: "panel" }, React.createElement(SeverityBars, { items: severityItems })),
+
+          React.createElement(
+            "div",
+            { className: "grid-wide", style: { marginTop: "12px" } },
+            React.createElement(RankedList, {
+              title: "Top source IPs",
+              items: topIps,
+              labelKey: "ip",
+              valueKey: "failures",
+            }),
+            React.createElement(RankedList, {
+              title: "Most-targeted usernames",
+              items: topUsers,
+              labelKey: "username",
+              valueKey: "failures",
+            }),
+            React.createElement(
+              "div",
+              { className: "panel" },
+              React.createElement(
+                "div",
+                { className: "section-heading" },
+                React.createElement("h2", null, "Latest alerts"),
+                React.createElement(
+                  "span",
+                  { className: "note" },
+                  "Chronological slice from alerts.json"
+                )
+              ),
+              React.createElement(AlertList, { alerts })
+            )
+          ),
+
+          React.createElement(
+            "div",
+            { className: "footer" },
+            "Serve from repository root (e.g. ",
+            React.createElement("code", null, "python -m http.server 8000"),
+            ") then open ",
+            React.createElement("code", null, "http://localhost:8000/frontend/index.html"),
+            ". The page fetches ",
+            React.createElement("code", null, "data/dashboard_data.json"),
+            " and ",
+            React.createElement("code", null, "data/alerts.json"),
+            " produced by the Python pipeline."
+          )
+        );
+      };
+
+      createRoot(document.getElementById("root")).render(React.createElement(App));
+    </script>
+  </body>
+</html>

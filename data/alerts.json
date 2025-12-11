@@ -1,0 +1,62 @@
+[
+  {
+    "type": "BRUTE_FORCE",
+    "severity": "high",
+    "source_ip": "10.10.10.10",
+    "count": 24,
+    "time_start": "2025-11-10T06:40:04",
+    "time_end": "2025-11-10T06:40:23",
+    "details": "Repeated failed logins within 5 minutes",
+    "username": null
+  },
+  {
+    "type": "BRUTE_FORCE",
+    "severity": "high",
+    "source_ip": "198.51.100.77",
+    "count": 6,
+    "time_start": "2025-11-10T06:36:10",
+    "time_end": "2025-11-10T06:36:30",
+    "details": "Repeated failed logins within 5 minutes",
+    "username": null
+  },
+  {
+    "type": "SUSPICIOUS_IP",
+    "severity": "medium",
+    "source_ip": "198.51.100.77",
+    "count": 6,
+    "time_start": "2025-11-10T06:35:01",
+    "time_end": "2025-11-10T06:36:30",
+    "details": "Source IP falls within suspicious ranges: 203.0.113.0/24, 198.51.100.0/24, 45.83.0.0/16, 185.220.100.0/24",
+    "username": null
+  },
+  {
+    "type": "SUSPICIOUS_IP",
+    "severity": "medium",
+    "source_ip": "203.0.113.5",
+    "count": 4,
+    "time_start": "2025-11-10T06:31:44",
+    "time_end": "2025-11-10T06:32:02",
+    "details": "Source IP falls within suspicious ranges: 203.0.113.0/24, 198.51.100.0/24, 45.83.0.0/16, 185.220.100.0/24",
+    "username": "admin"
+  },
+  {
+    "type": "SUSPICIOUS_IP",
+    "severity": "medium",
+    "source_ip": "45.83.23.12",
+    "count": 2,
+    "time_start": "2025-11-10T06:38:15",
+    "time_end": "2025-11-10T06:39:05",
+    "details": "Source IP falls within suspicious ranges: 203.0.113.0/24, 198.51.100.0/24, 45.83.0.0/16, 185.220.100.0/24",
+    "username": "deploy"
+  },
+  {
+    "type": "RATE_LIMIT",
+    "severity": "medium",
+    "source_ip": "10.10.10.10",
+    "count": 24,
+    "time_start": "2025-11-10T06:40:00",
+    "time_end": "2025-11-10T06:41:00",
+    "details": "Exceeded 20 events per minute",
+    "username": null
+  }
+]

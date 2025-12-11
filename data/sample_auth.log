@@ -1,0 +1,42 @@
+Nov 10 06:30:01 ubuntu sshd[19925]: Accepted password for alice from 10.0.0.5 port 53210 ssh2
+Nov 10 06:31:44 ubuntu sshd[19925]: Failed password for invalid user admin from 203.0.113.5 port 43858 ssh2
+Nov 10 06:31:49 ubuntu sshd[19925]: Failed password for invalid user admin from 203.0.113.5 port 43858 ssh2
+Nov 10 06:31:55 ubuntu sshd[19925]: Failed password for invalid user admin from 203.0.113.5 port 43858 ssh2
+Nov 10 06:32:02 ubuntu sshd[19925]: Failed password for invalid user admin from 203.0.113.5 port 43858 ssh2
+Nov 10 06:32:10 ubuntu sshd[19925]: Accepted password for bob from 192.0.2.4 port 50122 ssh2
+Nov 10 06:35:01 ubuntu sshd[19925]: Failed password for root from 198.51.100.77 port 55221 ssh2
+Nov 10 06:35:10 ubuntu sshd[19925]: Failed password for root from 198.51.100.77 port 55221 ssh2
+Nov 10 06:35:30 ubuntu sshd[19925]: Failed password for root from 198.51.100.77 port 55221 ssh2
+Nov 10 06:35:50 ubuntu sshd[19925]: Failed password for root from 198.51.100.77 port 55221 ssh2
+Nov 10 06:36:10 ubuntu sshd[19925]: Failed password for root from 198.51.100.77 port 55221 ssh2
+Nov 10 06:36:30 ubuntu sshd[19925]: Failed password for root from 198.51.100.77 port 55221 ssh2
+Nov 10 06:37:02 ubuntu sshd[19925]: Accepted password for carol from 172.16.5.10 port 61234 ssh2
+Nov 10 06:38:15 ubuntu sshd[19925]: Invalid user deploy from 45.83.23.12 port 41122 ssh2
+Nov 10 06:39:05 ubuntu sshd[19925]: Failed password for invalid user deploy from 45.83.23.12 port 41122 ssh2
+Nov 10 06:40:00 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61000 ssh2
+Nov 10 06:40:01 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61001 ssh2
+Nov 10 06:40:02 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61002 ssh2
+Nov 10 06:40:03 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61003 ssh2
+Nov 10 06:40:04 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61004 ssh2
+Nov 10 06:40:05 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61005 ssh2
+Nov 10 06:40:06 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61006 ssh2
+Nov 10 06:40:07 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61007 ssh2
+Nov 10 06:40:08 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61008 ssh2
+Nov 10 06:40:09 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61009 ssh2
+Nov 10 06:40:10 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61010 ssh2
+Nov 10 06:40:11 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61011 ssh2
+Nov 10 06:40:12 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61012 ssh2
+Nov 10 06:40:13 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61013 ssh2
+Nov 10 06:40:14 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61014 ssh2
+Nov 10 06:40:15 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61015 ssh2
+Nov 10 06:40:16 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61016 ssh2
+Nov 10 06:40:17 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61017 ssh2
+Nov 10 06:40:18 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61018 ssh2
+Nov 10 06:40:19 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61019 ssh2
+Nov 10 06:40:20 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61020 ssh2
+Nov 10 06:40:21 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61021 ssh2
+Nov 10 06:40:22 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61022 ssh2
+Nov 10 06:40:23 ubuntu sshd[19925]: Failed password for test from 10.10.10.10 port 61023 ssh2
+Nov 10 06:41:01 ubuntu sshd[19925]: Accepted password for dan from 192.0.2.10 port 51111 ssh2
+This is not a valid log line
+Nov 10 25:99:99 ubuntu sshd[19925]: Failed password for invalid user ghost from 1.2.3.4 port 12345 ssh2
