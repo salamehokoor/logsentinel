@@ -33,13 +33,16 @@ def parse_auth_log(path: Path) -> pd.DataFrame:
         DataFrame with columns: timestamp, ip, username, event_type, status, raw_line.
     """
     records: List[Dict] = []
-    for idx, line in enumerate(path.read_text(errors="ignore").splitlines(), start=1):
+    for idx, line in enumerate(path.read_text(errors="ignore").splitlines(),
+                               start=1):
         parsed = _parse_line(line, idx)
         if parsed:
             records.append(parsed)
 
     if not records:
-        return pd.DataFrame(columns=["timestamp", "ip", "username", "event_type", "status", "raw_line"])
+        return pd.DataFrame(columns=[
+            "timestamp", "ip", "username", "event_type", "status", "raw_line"
+        ])
 
     df = pd.DataFrame(records)
     df["timestamp"] = pd.to_datetime(df["timestamp"])

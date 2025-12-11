@@ -55,7 +55,8 @@ def run_pipeline(
         try:
             df = parse_windows_security_log(log_name=windows_log)
         except Exception as exc:
-            raise SystemExit(f"[ERROR] Windows Event Log read failed: {exc}") from exc
+            raise SystemExit(
+                f"[ERROR] Windows Event Log read failed: {exc}") from exc
     else:
         df = parse_auth_log(log_file)
     if df.empty:
@@ -63,7 +64,8 @@ def run_pipeline(
         return
 
     detectors = [
-        BruteForceDetector(threshold=brute_threshold, window_minutes=brute_window_minutes),
+        BruteForceDetector(threshold=brute_threshold,
+                           window_minutes=brute_window_minutes),
         SuspiciousIPDetector(),
         RateLimitDetector(threshold_per_minute=rate_threshold_per_minute),
     ]
@@ -118,34 +120,33 @@ def build_dashboard_data(df: pd.DataFrame, alerts: List[Dict]) -> Dict:
     if not failed_df.empty:
         # Basic temporal and categorical patterns to support charts/heatmaps.
         failures_by_hour = (
-            failed_df.set_index("timestamp").resample("1h").size()
-        )
-        summary["attack_patterns"]["failed_logins_by_hour"] = [
-            {
-                "hour": ts.isoformat(timespec="seconds"),
-                "count": int(count),
-            }
-            for ts, count in failures_by_hour.items()
-            if count > 0
-        ]
+            failed_df.set_index("timestamp").resample("1h").size())
+        summary["attack_patterns"]["failed_logins_by_hour"] = [{
+            "hour":
+            ts.isoformat(timespec="seconds"),
+            "count":
+            int(count),
+        } for ts, count in failures_by_hour.items() if count > 0]
 
         top_ips = failed_df["ip"].dropna().value_counts().head(5)
-        summary["attack_patterns"]["top_source_ips"] = [
-            {"ip": ip, "failures": int(count)} for ip, count in top_ips.items()
-        ]
+        summary["attack_patterns"]["top_source_ips"] = [{
+            "ip": ip,
+            "failures": int(count)
+        } for ip, count in top_ips.items()]
 
         top_users = failed_df["username"].dropna().value_counts().head(5)
-        summary["attack_patterns"]["top_usernames"] = [
-            {"username": user, "failures": int(count)}
-            for user, count in top_users.items()
-        ]
+        summary["attack_patterns"]["top_usernames"] = [{
+            "username": user,
+            "failures": int(count)
+        } for user, count in top_users.items()]
 
     return summary
 
 
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
-    parser = argparse.ArgumentParser(description="LogSentinel - Security Log Analyzer")
+    parser = argparse.ArgumentParser(
+        description="LogSentinel - Security Log Analyzer")
     parser.add_argument(
         "--input-format",
         choices=["linux", "windows"],
@@ -156,12 +157,14 @@ def parse_args() -> argparse.Namespace:
         "--log-file",
         type=Path,
         default=Path("data") / "sample_auth.log",
-        help="Path to auth log file (linux only, default: data/sample_auth.log)",
+        help=
+        "Path to auth log file (linux only, default: data/sample_auth.log)",
     )
     parser.add_argument(
         "--windows-log",
         default="Security",
-        help="Windows Event Log name when --input-format=windows (default: Security)",
+        help=
+        "Windows Event Log name when --input-format=windows (default: Security)",
     )
     parser.add_argument(
         "--brute-threshold",
@@ -179,7 +182,8 @@ def parse_args() -> argparse.Namespace:
         "--rate-threshold-per-minute",
         type=int,
         default=20,
-        help="Event volume per minute to trigger rate-limit alert (default: 20)",
+        help=
+        "Event volume per minute to trigger rate-limit alert (default: 20)",
     )
     parser.add_argument(
         "--alerts-output",
@@ -191,7 +195,8 @@ def parse_args() -> argparse.Namespace:
         "--dashboard-output",
         type=Path,
         default=Path("data") / "dashboard_data.json",
-        help="Where to write dashboard summary JSON (default: data/dashboard_data.json)",
+        help=
+        "Where to write dashboard summary JSON (default: data/dashboard_data.json)",
     )
     return parser.parse_args()
 
