@@ -13,6 +13,7 @@ from __future__ import annotations
 import re
 from datetime import datetime
 from typing import Dict, List, Optional
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -28,6 +29,7 @@ except ImportError as exc:  # pragma: no cover - platform import guard
 LOGON_FAILED = 4625
 LOGON_SUCCESS = 4624
 LOGOFF = 4634
+APP_TZ = ZoneInfo("Asia/Amman")
 
 # Extract username and IP from event string payloads.
 USER_PATTERN = re.compile(r"(?im)^Account\s+Name:\s*(?P<user>[^\s].*?)\s*$")
@@ -123,6 +125,6 @@ def _extract(pattern: re.Pattern, text: str) -> Optional[str]:
 
 def _safe_timestamp(dt) -> datetime:
     try:
-        return datetime.fromtimestamp(dt.timestamp())
+        return datetime.fromtimestamp(dt.timestamp(), tz=APP_TZ)
     except Exception:
-        return datetime.now()
+        return datetime.now(tz=APP_TZ)

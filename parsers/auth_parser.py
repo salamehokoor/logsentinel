@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import pandas as pd
+from zoneinfo import ZoneInfo
 
 # Regex to capture the syslog-style prefix and the remainder of the message.
 LOG_PATTERN = re.compile(
@@ -20,6 +21,7 @@ LOG_PATTERN = re.compile(
 )
 IP_PATTERN = re.compile(r"from\s(?P<ip>\d{1,3}(?:\.\d{1,3}){3})")
 USER_PATTERN = re.compile(r"(?:user|invalid user)\s(?P<user>[A-Za-z0-9._-]+)")
+APP_TZ = ZoneInfo("Asia/Amman")
 
 
 def parse_auth_log(path: Path) -> pd.DataFrame:
@@ -46,6 +48,9 @@ def parse_auth_log(path: Path) -> pd.DataFrame:
 
     df = pd.DataFrame(records)
     df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df["timestamp"] = df["timestamp"].dt.tz_localize(
+        APP_TZ, nonexistent="NaT", ambiguous="NaT"
+    )
     return df
 
 

@@ -674,11 +674,11 @@
           const load = async () => {
             try {
               const [dashRes, alertRes] = await Promise.all([
-                fetch("../data/dashboard_data.json"),
-                fetch("../data/alerts.json"),
+                fetch("/api/dashboard"),
+                fetch("/api/alerts"),
               ]);
               if (!dashRes.ok) {
-                throw new Error("Unable to load dashboard_data.json");
+                throw new Error("Unable to load dashboard data from API");
               }
               const dashJson = await dashRes.json();
               const alertJson = alertRes.ok ? await alertRes.json() : [];
@@ -814,7 +814,7 @@
               React.createElement(
                 "p",
                 { className: "subtitle" },
-                "React preview over dashboard_data.json and alerts.json to validate the feed powering charts, lists, and severity indicators."
+                "Live React preview backed by the local API (/api/dashboard, /api/alerts) to validate the feed powering charts, lists, and severity indicators."
               )
             )
           ),
@@ -899,7 +899,7 @@
                 React.createElement(
                   "span",
                   { className: "note" },
-                  "Chronological slice from alerts.json"
+                  "Chronological slice from /api/alerts"
                 )
               ),
               React.createElement(AlertList, { alerts })
@@ -910,13 +910,13 @@
             "div",
             { className: "footer" },
             "Serve from repository root (e.g. ",
-            React.createElement("code", null, "python -m http.server 8000"),
+            React.createElement("code", null, "python main.py"),
             ") then open ",
-            React.createElement("code", null, "http://localhost:8000/frontend/index.html"),
+            React.createElement("code", null, "http://localhost:8000"),
             ". The page fetches ",
-            React.createElement("code", null, "data/dashboard_data.json"),
+            React.createElement("code", null, "/api/dashboard"),
             " and ",
-            React.createElement("code", null, "data/alerts.json"),
+            React.createElement("code", null, "/api/alerts"),
             " produced by the Python pipeline."
           )
         );

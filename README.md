@@ -1,14 +1,15 @@
 # LogSentinel
 
-LogSentinel is a Python mini-SIEM that ingests Linux authentication logs or Windows Event Logs, detects suspicious activity, and exports JSON alerts plus dashboard-friendly summaries. It is intentionally modular so you can plug in new detectors or swap parsers without rewriting the pipeline.
+LogSentinel is a Python mini-SIEM that ingests Linux authentication logs or Windows Event Logs, detects suspicious activity, and persists alerts plus dashboard-ready summaries into SQLite (served via a built-in API). It is intentionally modular so you can plug in new detectors or swap parsers without rewriting the pipeline.
 
 ## Features
 - Auth log parsing (Linux) with regex, pandas DataFrame output, and graceful handling of malformed lines.
 - Windows Event Log parsing (pywin32) to reuse the same pipeline.
 - Detectors for brute force, suspicious IP ranges, and per-minute rate limiting (now CLI-tunable thresholds).
-- JSON alert exporting with consistent schema (type, severity, source IP, counts, timeframe, username when available).
-- Dashboard prep via `dashboard_data.json` summarizing failed logins, unique attackers, alerts by type/severity, and attack patterns.
-- File-based, dependency-light, and easy to extend with additional detectors.
+- SQLite persistence plus a built-in HTTP server exposing `/api/dashboard` and `/api/alerts` for the dashboard.
+- Dashboard-ready summary (alerts by type/severity, failed logins, top attackers, temporal rollups).
+- Easy to extend with additional detectors.
+- Timestamps are normalized to the Asia/Amman timezone in outputs and dashboard.
 
 ## Installation
 1) Ensure Python 3.9+ is available.  
@@ -18,45 +19,30 @@ LogSentinel is a Python mini-SIEM that ingests Linux authentication logs or Wind
    ```
 
 ## Usage
-### Linux auth logs (default)
+Quick start (auto OS detection):
 ```bash
 python main.py
-python main.py --log-file /var/log/auth.log --alerts-output out/alerts.json --dashboard-output out/dashboard_data.json
 ```
+Then open `http://localhost:8000` (or `/frontend/`) for the dashboard. The server exposes `/api/dashboard` and `/api/alerts` from SQLite (`data/logsentinel.sqlite`).
 
-### Windows Event Log (Security) via pywin32
-Install dependencies (adds pywin32 on Windows):
-```powershell
-pip install -r requirements.txt
-```
+Linux/macOS (file-based):
+- Default: tries `/var/log/auth.log`, then `/var/log/secure`, then `/var/log/syslog`.
+- Override: `python main.py --log-file /path/to/auth.log`
 
-Read the Security log directly (requires Administrator):
-```powershell
-python main.py --input-format windows --windows-log Security --alerts-output data\\alerts.json --dashboard-output data\\dashboard_data.json
-```
-If you don't have elevation, switch to a readable log like `Application`:
-```powershell
-python main.py --input-format windows --windows-log Application
-```
+Windows Event Log:
+- Admin for Security log: `python main.py --input-format windows --windows-log Security`
+- No admin: `python main.py --input-format windows --windows-log Application`
 
-Key options:
-- `--input-format`: `linux` (auth log file) or `windows` (Event Log).
-- `--log-file`: path to the auth log file (linux only, default: `data/sample_auth.log`).
-- `--windows-log`: Windows Event Log name (default: `Security`).
-- `--alerts-output`: where to write alerts JSON (default: `data/alerts.json`).
-- `--dashboard-output`: where to write dashboard summary JSON (default: `data/dashboard_data.json`).
-- `--brute-threshold`: failed login count to trigger brute-force alert (default: 5).
-- `--brute-window-minutes`: rolling window in minutes for brute-force detection (default: 5).
-- `--rate-threshold-per-minute`: per-minute volume to trigger rate-limit alert (default: 20).
+Synthetic Windows feed (no pywin32 needed):
+- `python main.py --input-format windows-fake` (seeds/reads synthetic events from SQLite)
 
-Threshold tuning examples:
-```bash
-# Linux file, more sensitive brute-force, stricter rate limit
-python main.py --log-file /var/log/auth.log --brute-threshold 3 --brute-window-minutes 10 --rate-threshold-per-minute 15
-
-# Windows Event Log, same outputs, custom thresholds
-python main.py --input-format windows --windows-log Security --brute-threshold 4 --rate-threshold-per-minute 25
-```
+Useful flags:
+- `--input-format`: `auto` | `linux` | `windows` | `windows-fake`
+- `--db-path`: SQLite location (default: `data/logsentinel.sqlite`)
+- `--serve-port`: dashboard/API port (default: 8000)
+- `--interval-seconds`: live loop cadence (default: 30)
+- `--once`: single pass and exit
+- `--brute-threshold`, `--brute-window-minutes`, `--rate-threshold-per-minute`: detector tuning
 
 ## Tests
 Install dev/test deps (pytest is already listed in `requirements.txt`):
@@ -70,7 +56,7 @@ Included:
 - `tests/test_detectors.py`: smoke tests for brute-force, rate-limit, and suspicious-IP detectors on the sample log.
 
 ## Example Output
-Example alert emitted to `data/alerts.json`:
+Example alert returned from `GET /api/alerts`:
 ```json
 {
   "type": "BRUTE_FORCE",
@@ -83,7 +69,7 @@ Example alert emitted to `data/alerts.json`:
 }
 ```
 
-Example dashboard summary from `data/dashboard_data.json`:
+Example dashboard summary from `GET /api/dashboard`:
 ```json
 {
   "total_events": 40,
